@@ -1,0 +1,23 @@
+@if (isLoading) {
+  <div>Загрузка данных...</div>
+}
+
+@if (errorMessage) {
+  <div class="error">
+    {{ errorMessage }}
+  </div>
+}
+
+@if (!isLoading && !errorMessage) {
+  <ul class="list_of_packages">
+    @for (pkg of packages; track pkg.id) {
+      <li class="package">
+        <div class="pack_head">{{ pkg.id }}</div> 
+        <div class="pack_data">{{ pkg.weeklyDownloads }}</div>
+        <div class="pack_data">{{ pkg.dependencyCount }}</div>
+
+        <!-- Подставь свои поля данных -->
+      </li>
+    }
+  </ul>
+}
