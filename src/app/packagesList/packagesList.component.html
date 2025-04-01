@@ -10,13 +10,14 @@
 
 @if (!isLoading && !errorMessage) {
   <ul class="list_of_packages">
-    @for (pkg of packages; track pkg.id) {
+    @for (pkg of changedPackages; track pkg.id) {
       <li class="package">
-        <div class="pack_head">{{ pkg.id }}</div> 
-        <div class="pack_data">{{ pkg.weeklyDownloads }}</div>
+        <div class="pack_head" [innerHTML]="highlightPackageName(pkg.id)"></div>
+        <div class="pack_data">
+          {{ pkg.weeklyDownloads }} 
+          <ng-icon class="icon-download" name="bootstrapDownload"/>
+        </div>
         <div class="pack_data">{{ pkg.dependencyCount }}</div>
-
-        <!-- Подставь свои поля данных -->
       </li>
     }
   </ul>

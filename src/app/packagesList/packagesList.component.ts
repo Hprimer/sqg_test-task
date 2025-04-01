@@ -1,25 +1,37 @@
 import { Component, OnInit } from '@angular/core';
 import { PackagesService } from '../packages/packages.service';
 import { HttpClientModule } from '@angular/common/http';
+import {Package, ChangedFormatPackage} from '../interfaces/package.interface'
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { bootstrapDownload } from '@ng-icons/bootstrap-icons';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+
 
 @Component({
   selector: 'app-packagesList',
   standalone: true,
-  imports: [ HttpClientModule],
+  imports: [ NgIcon],
+  viewProviders: [provideIcons({ bootstrapDownload })],
   templateUrl: './packagesList.component.html',
   styleUrls: ['./packagesList.component.scss']
 })
 export class PackagesListComponent implements OnInit {
   packages: Package[] = [];
+  changedPackages: ChangedFormatPackage[] =[];
   isLoading = true;
   errorMessage: string | null = null;
 
-  constructor(private packagesService: PackagesService) {}
+  constructor(
+    private packagesService: PackagesService,
+    private sanitizer: DomSanitizer
+  ) {}
 
   ngOnInit(): void {
     this.packagesService.getPackages().subscribe({
-      next: (data) => {
-        this.packages = this.changeFormat(data);
+      next: (data:Package[]) => {
+        // this.packages = data;
+        this.changedPackages = this.changeFormat(data)
+        
         this.isLoading = false;
       },
       error: (err) => {
@@ -29,24 +41,46 @@ export class PackagesListComponent implements OnInit {
       }
     });
   }
-  private changeFormat(packages: Package[]): Package[] {
+  private changeFormat(packages: Package[]): ChangedFormatPackage[] {
     return packages.map(pkg => {
-
-      const pkgCopy = {...pkg};
-      const downloads:number = pkgCopy.weeklyDownloads;
-      const dependecies = pkgCopy.dependencyCount;
       
-      if (downloads >= 1000 && downloads < 1000000) {
-        pkgCopy.weeklyDownloads = `${Math.round(downloads/1000)}K`;
-      } else if (downloads >= 1000000) {
-        pkgCopy.weeklyDownloads = `${Math.round(downloads/1000000)}M`;
-      }
-
-      if (dependecies > 1)
-        pkgCopy.dependencyCount = `${dependecies} dependencies`
-      else pkgCopy.dependencyCount = `${dependecies} dependency`
-
-      return pkgCopy;
+      const formattedPkg: ChangedFormatPackage = {
+        id: pkg.id,
+        weeklyDownloads: this.formatDownloads(pkg.weeklyDownloads),
+        dependencyCount: this.formatDependencies(pkg.dependencyCount)
+      };
+      return formattedPkg;
     });
   }
+
+  private formatDownloads (downloads:number):string{
+    let tmp = downloads.toString();
+
+    if (downloads >= 1000 && downloads < 1000000) {
+      tmp = `${Math.round(downloads/1000)}K`;
+    } else if (downloads >= 1000000) {
+      tmp = `${Math.round(downloads/1000000)}M`;
+    }
+    return tmp;
+  }
+  private formatDependencies (dependecies:number):string {
+    
+    return dependecies > 1 ? `${dependecies} dependencies` 
+    : `${dependecies} dependency`
+  }
+
+  highlightPackageName(id: string): SafeHtml {
+    if (!id.includes('/')) {
+      return this.sanitizer.bypassSecurityTrustHtml(id);
+    }
+
+    const [first, second] = id.split('/');
+    const highlighted = `
+      <span style="color:orange;">${first}/</span><span>${second}</span>
+    `;
+
+    return this.sanitizer.bypassSecurityTrustHtml(highlighted);
+  }
+
+
 }
