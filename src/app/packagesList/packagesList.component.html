@@ -1,3 +1,17 @@
+<div class="tools">
+  <div class="search-block">
+    <input 
+      type="text" 
+      [(ngModel)]="searchTerm"
+      (input)="searchPackages()"
+      placeholder="Поиск по ID пакета..."
+      class="search-input"
+    >
+  </div>
+  <div class="reload-btn" (click)="reloadData()">
+    <ng-icon class="icon-reload" name="bootstrapArrowRepeat"/>
+  </div>
+</div>
 @if (isLoading) {
   <div>Загрузка данных...</div>
 }
@@ -10,12 +24,7 @@
 
 @if (!isLoading && !errorMessage) {
   <ul class="list_of_packages">
-    @for (pkg of changedPackages; track pkg.id) {
-      <!-- <li class="package"
-      [class.highlighted]="isHighlighted(pkg.id)"
-      [class.main-highlight]="pkg.id === hoveredPackage"
-      (mouseenter)="onMouseEnter(pkg.id)"
-      (mouseleave)="onMouseLeave()"> -->
+    @for (pkg of filteredPackages; track pkg.id) {
       <li class="package"
       [class.highlighted]="isHighlighted(pkg.id)"
       (mouseenter)="onMouseEnter(pkg.id)"
@@ -27,6 +36,9 @@
         </div>
         <div class="pack_data">{{ pkg.dependencyCount }}</div>
       </li>
+    }
+    @empty {
+      <p>Ничего не найдено</p>
     }
   </ul>
 }

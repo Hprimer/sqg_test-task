@@ -37,6 +37,21 @@
 }
 .icon-download{
 	margin-left: 5px;
-	height: 13px;
+	height: 16px;
 }
 
+.tools{
+	flex-direction: row;
+	display: flex;
+	justify-content: center;
+	gap: 5px;
+}
+.reload-btn{
+	width: 20px;
+	height: 20px;
+	border: solid 1.5px grey;
+	border-radius: 5px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}

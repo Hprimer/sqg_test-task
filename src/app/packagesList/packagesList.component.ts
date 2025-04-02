@@ -1,48 +1,62 @@
 import { Component, OnInit } from '@angular/core';
 import { PackagesService } from '../packages/packages.service';
-import { HttpClientModule } from '@angular/common/http';
-import {Package, ChangedFormatPackage} from '../interfaces/package.interface'
+import { Package, ChangedFormatPackage} from '../interfaces/package.interface'
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { bootstrapDownload } from '@ng-icons/bootstrap-icons';
+import { bootstrapDownload, bootstrapArrowRepeat } from '@ng-icons/bootstrap-icons';
 import { NgIcon, provideIcons } from '@ng-icons/core';
+import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 
 
 @Component({
   selector: 'app-packagesList',
   standalone: true,
-  imports: [ NgIcon],
-  viewProviders: [provideIcons({ bootstrapDownload })],
+  imports: [ NgIcon, FormsModule, CommonModule],
+  viewProviders: [provideIcons({ bootstrapDownload, bootstrapArrowRepeat })],
   templateUrl: './packagesList.component.html',
   styleUrls: ['./packagesList.component.scss']
 })
 export class PackagesListComponent implements OnInit {
   packages: Package[] = [];
   changedPackages: ChangedFormatPackage[] =[];
+  filteredPackages: ChangedFormatPackage[] = [];
   isLoading = true;
-  errorMessage: string | null = null;
-  
+  errorMessage: string | null = null;  
   highlightedDeps: string[] = [];
+  searchTerm: string = '';
 
   constructor(
     private packagesService: PackagesService,
     private sanitizer: DomSanitizer
   ) {}
 
-  ngOnInit(): void {
+  private loadData(): void {
+    this.isLoading = true;
+    this.errorMessage = null;
+    
     this.packagesService.getPackages().subscribe({
-      next: (data:Package[]) => {
-        // this.packages = data;
-        this.changedPackages = this.changeFormat(data)
-        
+      next: (data) => {
+        this.changedPackages = this.changeFormat(data);
+        this.filteredPackages = [...this.changedPackages];
         this.isLoading = false;
       },
       error: (err) => {
-        this.errorMessage = 'Не удалось загрузить данные';
+        this.errorMessage = 'Ошибка загрузки';
         this.isLoading = false;
-        console.error(err);
       }
     });
   }
+  
+  ngOnInit(): void {
+    this.loadData();
+  }
+  
+  reloadData(): void {
+    this.highlightedDeps = []; // Сброс дополнительных состояний
+    this.searchTerm = ''; // Очистка поиска
+    this.loadData();
+  }
+
   private changeFormat(packages: Package[]): ChangedFormatPackage[] {
     return packages.map(pkg => {
       
@@ -54,7 +68,7 @@ export class PackagesListComponent implements OnInit {
       return formattedPkg;
     });
   }
-
+  
   private formatDownloads (downloads:number):string{
     let tmp = downloads.toString();
 
@@ -96,14 +110,18 @@ export class PackagesListComponent implements OnInit {
         }
       });
   }
-
   onMouseLeave(): void {
     this.highlightedDeps = [];
   }
-
   isHighlighted(pkgId: string): boolean {
     return this.highlightedDeps.includes(pkgId) 
   }
 
+  searchPackages(): void {
+    const term = this.searchTerm.toLowerCase();
+    this.filteredPackages = this.changedPackages.filter(pkg => 
+      pkg.id.toLowerCase().includes(term)
+    );
+  }
 
 }
