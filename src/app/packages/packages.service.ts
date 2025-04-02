@@ -13,4 +13,7 @@ export class PackagesService {
   getPackages(): Observable<any[]> {
     return this.http.get<any[]>(this.apiUrl);
   }
+  getPackageDependencies(id: string): Observable<string[]> {
+    return this.http.get<string[]>(`${this.apiUrl}/${id}/dependencies`);
+  }
 }

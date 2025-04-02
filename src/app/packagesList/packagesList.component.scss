@@ -19,6 +19,9 @@
 .package:hover{
 	transform: scale(1.05);
 }
+.highlighted .pack_head{
+	background-color: pink;
+}
 .pack_head{
 	display: flex;
 	justify-content: center;
@@ -36,3 +39,4 @@
 	margin-left: 5px;
 	height: 13px;
 }
+

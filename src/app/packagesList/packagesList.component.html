@@ -11,7 +11,15 @@
 @if (!isLoading && !errorMessage) {
   <ul class="list_of_packages">
     @for (pkg of changedPackages; track pkg.id) {
-      <li class="package">
+      <!-- <li class="package"
+      [class.highlighted]="isHighlighted(pkg.id)"
+      [class.main-highlight]="pkg.id === hoveredPackage"
+      (mouseenter)="onMouseEnter(pkg.id)"
+      (mouseleave)="onMouseLeave()"> -->
+      <li class="package"
+      [class.highlighted]="isHighlighted(pkg.id)"
+      (mouseenter)="onMouseEnter(pkg.id)"
+      (mouseleave)="onMouseLeave()">
         <div class="pack_head" [innerHTML]="highlightPackageName(pkg.id)"></div>
         <div class="pack_data">
           {{ pkg.weeklyDownloads }} 

@@ -20,6 +20,8 @@ export class PackagesListComponent implements OnInit {
   changedPackages: ChangedFormatPackage[] =[];
   isLoading = true;
   errorMessage: string | null = null;
+  
+  highlightedDeps: string[] = [];
 
   constructor(
     private packagesService: PackagesService,
@@ -80,6 +82,27 @@ export class PackagesListComponent implements OnInit {
     `;
 
     return this.sanitizer.bypassSecurityTrustHtml(highlighted);
+  }
+
+  onMouseEnter(pkgId: string): void {
+    this.packagesService.getPackageDependencies(pkgId)
+      .subscribe({
+        next: (deps) => {
+          this.highlightedDeps = deps;
+        },
+        error: (err) => {
+          console.error('Ошибка загрузки зависимостей', err);
+          this.highlightedDeps = [];
+        }
+      });
+  }
+
+  onMouseLeave(): void {
+    this.highlightedDeps = [];
+  }
+
+  isHighlighted(pkgId: string): boolean {
+    return this.highlightedDeps.includes(pkgId) 
   }
 
 
